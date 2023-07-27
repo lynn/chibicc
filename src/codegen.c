@@ -930,11 +930,11 @@ void codegen(Program *prog, bool do_opt) {
   }
   if (!need_argc_argv) {
     printf("  LIT2r 0000 main_ POP2r BRK\n");
+  } else {
     if (need_device_hook[0]) {
       // TODO: passthrough for on_console() for stdin
       error("Can't use on_console() and main(int argc, char **argv) at the same time");
     }
-  } else {
     do_argc_argv_hook();
   }
   for (i = 0; i < sizeof(devices) / sizeof(Device); i++) {
