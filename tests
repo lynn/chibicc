@@ -6,7 +6,7 @@
  * This is a block comment.
  */
 
-#include <uxn.h>
+#include <varvara.h>
 void print(char *s) {
   for (; *s; *s++) putchar(*s);
 }

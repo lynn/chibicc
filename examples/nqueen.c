@@ -6,7 +6,7 @@
 // $ uxnasm tmp.tal tmp.rom
 // $ uxncli tmp.rom
 
-#include <uxn.h>
+#include <varvara.h>
 
 int print_board(int (*board)[10]) {
   for (int i = 0; i < 10; i++) {

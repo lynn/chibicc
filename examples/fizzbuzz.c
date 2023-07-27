@@ -6,7 +6,7 @@
 // $ uxnasm tmp.tal tmp.rom
 // $ uxncli tmp.rom
 
-#include <uxn.h>
+#include <varvara.h>
 
 void puts(char *s) {
   for (; *s; ++s)

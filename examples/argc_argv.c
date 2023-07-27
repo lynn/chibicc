@@ -1,4 +1,4 @@
-#include <uxn.h>
+#include <varvara.h>
 
 void print_int(unsigned char i) {
 	putchar('0' + ((i / 10) % 10));

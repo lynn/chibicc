@@ -1,5 +1,5 @@
 #include "atari8_uf1.c"
-#include <uxn.h>
+#include <varvara.h>
 
 #define SUBPIXELS 16
 #define WIDTH 200

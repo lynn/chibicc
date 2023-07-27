@@ -8,7 +8,7 @@
 //     uxnasm tmp.tal tmp.rom
 //     uxnemu tmp.rom
 
-#include <uxn.h>
+#include <varvara.h>
 
 // Multiply two 8.8 fixed point numbers.
 // Defined in mandelbrot_mul.tal
