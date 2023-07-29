@@ -12,7 +12,7 @@ chibicc-uxn is featureful enough to write small [games](examples/danmaku.c) and 
 
 Running `make` will build `./chibicc`.
 
-chibicc itself has no preprocessor, but any C compiler's `-E` flag will do. We use `-I.` to include uxn.h and `-P` to eliminate `#` lines from the preprocessor output:
+chibicc itself has no preprocessor, but any C compiler's `-E` flag will do. We use `-I.` to include `varvara.h` or just `uxn.h` and `-P` to eliminate `#` lines from the preprocessor output:
 
 ```sh
 gcc -I. -P -E examples/day3.c -o tmp.c
@@ -52,7 +52,7 @@ See also `make test`, which runs a test suite.
 
 [Varvara](https://wiki.xxiivv.com/site/varvara.html) is the set of I/O interfaces for Uxn-based tools and games.
 
-[uxn.h](./uxn.h) defines macros for setting the window size, drawing sprites on the screen, playing sounds, etc.
+[varvara.h](./varvara.h) defines macros for setting the window size, drawing sprites on the screen, playing sounds, etc.
 
 To set up Varvara event handlers, just define any of the following functions:
 
