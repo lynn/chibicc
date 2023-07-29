@@ -1,5 +1,16 @@
 #include <uxn.h>
 
+void exit(char status);
+
+typedef struct {
+    char operation; // 1 = copy
+    int length;
+    int src_page;
+    void* src_addr;
+    int dst_page;
+    void* dst_addr;
+} Expansion;
+
 // https://wiki.xxiivv.com/site/varvara.html
 #define expansion(ptr) deo2(ptr, 0x02)
 #define friend(func) deo2(func, 0x04)
