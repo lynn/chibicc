@@ -875,7 +875,7 @@ static void emit_text(Program *prog) {
   }
 }
 
-void do_argc_argv_hook(void) {
+void varvara_argc_argv_hook(void) {
   // This is routines/argc_argv.tal but without comments or indentation.
   // To update this function after editing that file, use update_argc_argv.sh
   printf("  LIT2r fffe #0001 STH2kr STA2 LIT2r 0001 SUB2r #17 DEI ?&set_arg_hook !prep_argc_argv_and_call_main\n");
@@ -890,7 +890,7 @@ void do_argc_argv_hook(void) {
   printf("  &strlen_loop INC2k SWP2 LDA ?&strlen_loop DUP2 #fffe LTH2 ?&argv_loop POP2 POP2 STH2kr #fffe LDA2 main_ BRK\n");
 }
 
-void codegen(Program *prog, bool do_opt, int devices_size, Device* devices) {
+void codegen(Program *prog, bool do_opt, int devices_size, Device* devices, Device* console, void (*argc_argv_hook)(void)) {
   int i;
   bool need_device_hook[devices_size];
   for(i = 0; i < devices_size; ++i){ need_device_hook[i] = false; }
@@ -921,11 +921,20 @@ void codegen(Program *prog, bool do_opt, int devices_size, Device* devices) {
   if (!need_argc_argv) {
     printf("  LIT2r 0000 main_ POP2r BRK\n");
   } else {
-    if (need_device_hook[0]) {
-      // TODO: passthrough for on_console() for stdin
-      error("Can't use on_console() and main(int argc, char **argv) at the same time");
+    if (!console) {
+      error("main(int, char*[]), but no console device");
     }
-    do_argc_argv_hook();
+    if (console < devices || console >= devices + devices_size) {
+      error("main(int, char*[]), but invalid console device pointer");
+    }
+    if (need_device_hook[console - devices]) {
+      // TODO: passthrough for on_console() for stdin
+      error("main(int, char*[]) clashes with console device hook");
+    }
+    if (!argc_argv_hook) {
+      error("main(int, char*[]), but hook is missing");
+    }
+    argc_argv_hook();
   }
   for (i = 0; i < devices_size; i++) {
     if (need_device_hook[i]) {

@@ -82,7 +82,8 @@ int main(int argc, char **argv) {
     {"console", 0x10}, {"screen", 0x20}, {"audio1", 0x30},     {"audio2", 0x40},
     {"audio3", 0x50},  {"audio4", 0x60}, {"controller", 0x80}, {"mouse", 0x90},
   };
-  codegen(prog, do_opt, sizeof(devices) / sizeof(Device), devices);
+  codegen(prog, do_opt, sizeof(devices) / sizeof(Device), devices, &devices[0],
+    varvara_argc_argv_hook);
   fprintf(stderr, "codegen(): allocated %d bytes\n", total_alloc);
 
   return 0;

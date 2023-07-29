@@ -304,7 +304,9 @@ typedef struct {
   unsigned char port;
 } Device;
 
-void codegen(Program *prog, bool do_opt, int devices_size, Device* devices);
+void varvara_argc_argv_hook(void);
+
+void codegen(Program *prog, bool do_opt, int devices_size, Device* devices, Device* console, void (*argc_argv_hook)(void));
 
 //
 // optimize.c
