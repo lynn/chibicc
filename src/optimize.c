@@ -393,6 +393,42 @@ static bool optimize_pass(Instruction *prog, int stage) {
       continue;
     }
 
+    //
+    // https://github.com/lynn/chibicc/issues/27
+    //
+
+    // instances of #00 ORA, [can] be removed.
+    if (IsLit(prog, 0) && prog->next->opcode == ORA) {
+      memcpy(prog, prog->next->next, sizeof(Instruction));
+      changed = true;
+      continue;
+    }
+
+    // [SWP] static arithmetic operation e.g. #abcd SWP, could be #cdab.
+    if (prog->opcode == LIT2 && prog->next->opcode == SWP) {
+      unsigned short tmp = prog->literal;
+      prog->literal = ((tmp & 0xFF) << 8) | ((tmp & 0xFF00) >> 8 );
+      prog->next = prog->next->next;
+      changed = true;
+      continue;
+    }
+
+    // DUP2 #0000 EQU2, [can] be turned into ORAk #00 EQU
+    if (prog->opcode == DUP2 && IsLit2(prog->next, 0) && prog->next->next->opcode == EQU2) {
+      prog            ->opcode = ORAk;
+      prog->next      ->opcode = LIT;
+      prog->next->next->opcode = EQU;
+      changed = true;
+      continue;
+    }
+
+    // #0000 SWP, to #0000
+    if (IsLit2(prog, 0) && prog->next->opcode == SWP) {
+      memcpy(prog->next, prog->next->next, sizeof(Instruction));
+      changed = true;
+      continue;
+    }
+
     prog = prog->next;
   }
   return changed;
