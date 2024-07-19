@@ -245,10 +245,33 @@ static void gen(Node *node, int depth) {
       load(node->ty);
     return;
   case ND_ASSIGN:
-    gen(node->rhs, depth);
-    fix_bool(node->ty);
-    gen_lval(node->lhs, depth + 2);
-    store(node->ty);
+    if (node->rhs->ty->kind == TY_STRUCT) {
+      int i = node->ty->size;
+      if (i % 2 == 1) {
+        i--;
+        gen_lval(node->rhs, depth);
+        emit_add(i);
+        op(LDA);
+        gen_lval(node->lhs, depth);
+        emit_add(i);
+        op(STA);
+      }
+      while (i > 0) {
+        i -= 2;
+        gen_lval(node->rhs, depth);
+        emit_add(i);
+        op(LDA2);
+        gen_lval(node->lhs, depth);
+        emit_add(i);
+        op(STA2);
+      }
+      lit2(0);
+    } else {
+      gen(node->rhs, depth);
+      fix_bool(node->ty);
+      gen_lval(node->lhs, depth + 2);
+      store(node->ty);
+    }
     return;
   case ND_TERNARY: {
     int seq = labelseq++;
