@@ -252,6 +252,8 @@ static void gen(Node *node, int depth) {
     return;
   case ND_ASSIGN:
     if (node->rhs->ty->kind == TY_STRUCT) {
+      gen(node->rhs, depth);
+      op(POP2);
       int i = node->ty->size;
       if (i % 2 == 1) {
         i--;

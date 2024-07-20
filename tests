@@ -722,6 +722,8 @@ void main() {
               "struct {int a; int b; int c;} x = {2,3,4}, y = {0,0,0}; y = x; y.a + y.b + y.c;");
   assert(2, ({ struct {char a; int b;} x={1,2}, y={0,0}; (y = x).b; }),
               "struct {char a; int b;} x={1,2}, y={0,0}; (y = x).b;");
+  assert(6, ({ struct {char a; int b;} x={1,2}, y={0,0}, z={0,0}; z = y = x; z.a + z.b + y.a + y.b; }),
+              "struct {char a; int b;} x={1,2}, y={0,0}, z={0,0}; z = y = x; z.a + z.b + y.a + y.b;");
 
   assert(0, strcmp(g15, "foo"), "strcmp(g15, \"foo\")");
   assert(0, strcmp(g16[0], "foo"), "strcmp(g16[0], \"foo\")");
