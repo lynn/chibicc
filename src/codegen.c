@@ -40,6 +40,12 @@ static void gen_addr(Node *node, int depth) {
     gen_addr(node->lhs, depth);
     emit_add(node->member->offset);
     return;
+  case ND_ASSIGN:
+    if (node->ty->kind == TY_STRUCT) {
+      gen_addr(node->rhs, depth);
+      return;
+    }
+    /* fallthrough */
   default:
     error_tok(node->tok, "not an lvalue");
     return;

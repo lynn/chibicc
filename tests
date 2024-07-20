@@ -720,6 +720,8 @@ void main() {
   assert(2, ({ struct {int a; int b;} x[2]={0,1,2,3}; x[1].a; }), "struct {int a; int b;} x[2]={0,1,2,3}; x[1].a;");
   assert(9, ({ struct {int a; int b; int c;} x = {2,3,4}, y = {0,0,0}; y = x; y.a + y.b + y.c; }),
               "struct {int a; int b; int c;} x = {2,3,4}, y = {0,0,0}; y = x; y.a + y.b + y.c;");
+  assert(2, ({ struct {char a; int b;} x={1,2}, y={0,0}; (y = x).b; }),
+              "struct {char a; int b;} x={1,2}, y={0,0}; (y = x).b;");
 
   assert(0, strcmp(g15, "foo"), "strcmp(g15, \"foo\")");
   assert(0, strcmp(g16[0], "foo"), "strcmp(g16[0], \"foo\")");
