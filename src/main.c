@@ -32,12 +32,27 @@ static char *read_file(char *path) {
 
 int main(int argc, char **argv) {
   bool do_opt = false;
+  bool emit_start = true;
 
   for (int i = 1; i < argc; i++) {
     if (!strcmp("-O", argv[i]) || !strcmp("-O1", argv[i])) {
       do_opt = true;
     } else if (!strcmp("-O0", argv[i])) {
       do_opt = false;
+    } else if (!strcmp("-nostartfiles", argv[i])) {
+      emit_start = false;
+    } else if (!strcmp("-h", argv[i])) {
+      printf("Usage: %s [options] <file>\n", argv[0]);
+      printf(
+        "\n"
+        "  -h             Print this help\n"
+        "  -O             Same as -O1\n"
+        "  -O1            Apply simple optimizations\n"
+        "  -O0            Apply no optimizations (default)\n"
+        "  -nostartfiles  Disable output of the default startup prelude\n"
+        "\n"
+      );
+      exit(0);
     } else if (argv[i][0] == '-') {
       error("%s: unrecognized option \"%s\"", argv[0], argv[i]);
     } else if (!filename) {
@@ -82,7 +97,7 @@ int main(int argc, char **argv) {
     {"console", 0x10}, {"screen", 0x20}, {"audio1", 0x30},     {"audio2", 0x40},
     {"audio3", 0x50},  {"audio4", 0x60}, {"controller", 0x80}, {"mouse", 0x90},
   };
-  codegen(prog, do_opt, sizeof(devices) / sizeof(Device), devices, &devices[0],
+  codegen(prog, do_opt, emit_start, sizeof(devices) / sizeof(Device), devices, &devices[0],
     varvara_argc_argv_hook);
   fprintf(stderr, "codegen(): allocated %d bytes\n", total_alloc);
 

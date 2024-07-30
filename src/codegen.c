@@ -921,51 +921,61 @@ void varvara_argc_argv_hook(void) {
   printf("  &strlen_loop INC2k SWP2 LDA ?&strlen_loop DUP2 #fffe LTH2 ?&argv_loop POP2 POP2 STH2kr #fffe LDA2 main_ BRK\n");
 }
 
-void codegen(Program *prog, bool do_opt, int devices_size, Device* devices, Device* console, void (*argc_argv_hook)(void)) {
+void codegen(
+  Program *prog,
+  bool do_opt,
+  bool emit_start,
+  int devices_size,
+  Device* devices,
+  Device* console,
+  void (*argc_argv_hook)(void)
+) {
   int i;
   bool need_device_hook[devices_size];
   for(i = 0; i < devices_size; ++i){ need_device_hook[i] = false; }
   bool need_argc_argv = false;
 
-  printf("|0100\n");
-  for (Function *fn = prog->fns; fn; fn = fn->next) {
-    for (i = 0; i < devices_size; i++) {
-      if (*devices[i].name && !strncmp(fn->name, "on_", 3) &&
-          !strcmp(fn->name + 3, devices[i].name)) {
-        printf("  ;L.%s.hook #%02x DEO2\n", devices[i].name, devices[i].port);
-        need_device_hook[i] = true;
+  if (emit_start) {
+    printf("|0100\n");
+    for (Function *fn = prog->fns; fn; fn = fn->next) {
+      for (i = 0; i < devices_size; i++) {
+        if (*devices[i].name && !strncmp(fn->name, "on_", 3) &&
+            !strcmp(fn->name + 3, devices[i].name)) {
+          printf("  ;L.%s.hook #%02x DEO2\n", devices[i].name, devices[i].port);
+          need_device_hook[i] = true;
+        }
+      }
+      if (!strcmp(fn->name, "main") && fn->params) {
+        if (!fn->params->next || (fn->params->next && fn->params->next->next)) {
+          error("main() has incorrect parameter count: 0 or 2 expected");
+        }
+        Type* ty1 = fn->params->var->ty;
+        Type* ty2 = fn->params->next->var->ty;
+        if (ty1->kind != TY_INT || ty2->kind != TY_PTR || !ty2->base ||
+            ty2->base->kind != TY_PTR || ty2->base->base->kind != TY_CHAR) {
+          error("main() parameters have incorrect types: main(int argc, char *argv[]) expected");
+        }
+        need_argc_argv = true;
       }
     }
-    if (!strcmp(fn->name, "main") && fn->params) {
-      if (!fn->params->next || (fn->params->next && fn->params->next->next)) {
-        error("main() has incorrect parameter count: 0 or 2 expected");
+    if (!need_argc_argv) {
+      printf("  LIT2r 0000 main_ POP2r BRK\n");
+    } else {
+      if (!console) {
+        error("main(int, char*[]), but no console device");
       }
-      Type* ty1 = fn->params->var->ty;
-      Type* ty2 = fn->params->next->var->ty;
-      if (ty1->kind != TY_INT || ty2->kind != TY_PTR || !ty2->base ||
-          ty2->base->kind != TY_PTR || ty2->base->base->kind != TY_CHAR) {
-        error("main() parameters have incorrect types: main(int argc, char *argv[]) expected");
+      if (console < devices || console >= devices + devices_size) {
+        error("main(int, char*[]), but invalid console device pointer");
       }
-      need_argc_argv = true;
+      if (need_device_hook[console - devices]) {
+        // TODO: passthrough for on_console() for stdin
+        error("main(int, char*[]) clashes with console device hook");
+      }
+      if (!argc_argv_hook) {
+        error("main(int, char*[]), but hook is missing");
+      }
+      argc_argv_hook();
     }
-  }
-  if (!need_argc_argv) {
-    printf("  LIT2r 0000 main_ POP2r BRK\n");
-  } else {
-    if (!console) {
-      error("main(int, char*[]), but no console device");
-    }
-    if (console < devices || console >= devices + devices_size) {
-      error("main(int, char*[]), but invalid console device pointer");
-    }
-    if (need_device_hook[console - devices]) {
-      // TODO: passthrough for on_console() for stdin
-      error("main(int, char*[]) clashes with console device hook");
-    }
-    if (!argc_argv_hook) {
-      error("main(int, char*[]), but hook is missing");
-    }
-    argc_argv_hook();
   }
   for (i = 0; i < devices_size; i++) {
     if (need_device_hook[i]) {
