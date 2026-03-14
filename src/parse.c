@@ -1926,6 +1926,19 @@ static Node *primary(void) {
         node->ty = void_type;
       } else if (!strcmp(node->funcname, "asm")) {
         node->ty = int_type;
+        // The last argument is known to be verbatim code.
+        Node *asm_code = node->args;
+        if (asm_code) {
+          while (asm_code->next) {
+            asm_code = asm_code->next;
+          }
+          // The last argument to `asm` should not be considered an initializer.
+          asm_code->var->initializer = false;
+        }
+        else {
+          // Let's also error out on bogus `asm()` usage.
+          error_tok(tok, "assembly code missing");
+        }
       } else {
         warn_tok(node->tok, "implicit declaration of a function");
         node->ty = int_type;
